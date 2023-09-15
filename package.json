@@ -9,7 +9,8 @@
     "lint": "eslint -c .eslintrc.js --fix index.js"
   },
   "keywords": [
-    "signalk-node-server-plugin"
+    "signalk-node-server-plugin",
+    "signalk-category-notifications"
   ],
   "repository": {
     "type": "git",
