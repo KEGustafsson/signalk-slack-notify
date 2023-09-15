@@ -3,7 +3,7 @@ const SlackNotify = require('slack-notify')
 module.exports = function createPlugin(app) {
   const plugin = {}
   plugin.id = 'signalk-slack-notify'
-  plugin.name = 'Signal K Slack Notify'
+  plugin.name = 'Signal K notifications to Slack'
   plugin.description = 'Send notifications from Signal K to Slack using Webhook API'
   var unsubscribes = []
 
@@ -56,11 +56,6 @@ module.exports = function createPlugin(app) {
     type: 'object',
     required: ['webhook'],
     properties: {
-      serverType: {
-        type: 'boolean',
-        default: false,
-        title: 'Signal K notifications to Slack'
-      },
       webhook: {
         type: 'string',
         title: 'Slack Webhook URL'
