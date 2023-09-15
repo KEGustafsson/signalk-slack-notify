@@ -4,7 +4,8 @@ module.exports = function createPlugin(app) {
   const plugin = {}
   plugin.id = 'signalk-slack-notify'
   plugin.name = 'Signal K notifications to Slack'
-  plugin.description = 'Send notifications from Signal K to Slack using Webhook API'
+  plugin.description =
+    'Send notifications from Signal K to Slack using Webhook API'
   var unsubscribes = []
 
   // eslint-disable-next-line no-unused-vars
@@ -30,19 +31,22 @@ module.exports = function createPlugin(app) {
         app.error('Error:' + subscriptionError)
       },
       (delta) => {
-        slack.send({
-          channel: options.slackChannel,
-          text: options.slackTitle,
-          fields: {
-            'Signal K path': delta.updates[0].values[0].path,
-            State: delta.updates[0].values[0].value.state,
-            Message: delta.updates[0].values[0].value.message,
-            Timestamp: delta.updates[0].values[0].value.timestamp
-          }
+        delta.updates.forEach((u) => {
+          slack.send({
+            channel: options.slackChannel,
+            text: options.slackTitle,
+            fields: {
+              'Signal K path': u.values[0].path,
+              State: u.values[0].value.state,
+              Message: u.values[0].value.message,
+              Timestamp: u.values[0].value.timestamp
+            }
+          })
+          setImmediate(() =>
+            app.emit('connectionwrite', { providerId: plugin.id })
+          )
+          app.debug(JSON.stringify(u, null, 2));
         })
-        setImmediate(() =>
-          app.emit('connectionwrite', { providerId: plugin.id })
-        )
       }
     )
   }
