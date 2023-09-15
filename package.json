@@ -1,0 +1,28 @@
+{
+  "name": "signalk-slack-notify",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "npm run prettier && npm run lint",
+    "prettier": "prettier -w index.js",
+    "lint": "eslint -c .eslintrc.js --fix index.js"
+  },
+  "keywords": [
+    "signalk-node-server-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KEGustafsson/signalk-slack-notify.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://github.com/KEGustafsson/signalk-slack-notify#readme",
+  "dependencies": {
+    "slack-notify": "^2.0.6"
+  },
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "prettier": "^2.7.1"
+  }
+}
