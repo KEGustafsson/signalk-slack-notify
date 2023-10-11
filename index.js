@@ -24,6 +24,24 @@ module.exports = function createPlugin(app) {
       ]
     }
 
+    function kelvinToCelsius(kelvin) {
+      if (kelvin < 0) {
+        throw new Error("Temperature in Kelvin cannot be negative");
+      }
+      return (kelvin - 273.15).toFixed(1); // Conversion formula
+    }
+
+    function msToKnots(metersPerSecond) {
+      if (metersPerSecond < 0) {
+        throw new Error("Speed in meters per second cannot be negative");
+      }
+      return metersPerSecond * 1.94384449; // Conversion factor
+    }
+
+    function radToDeg(radians) {
+      return (radians * 180) / Math.PI; // Conversion formula
+    }
+
     app.subscriptionmanager.subscribe(
       notificationsSubscription,
       unsubscribes,
@@ -32,13 +50,38 @@ module.exports = function createPlugin(app) {
       },
       (delta) => {
         delta.updates.forEach((u) => {
+          const slackPath = u.values[0].path.replace(/^notifications\./, '');
+          let slackValue;
+          let slackUnits;
+          let slackData;
+          try {
+            slackData = app.getSelfPath(slackPath);
+            slackValue = slackData.value  || null;
+            slackUnits = slackData.meta.units || null
+          } catch (error) {
+            slackValue = "";
+            slackUnits = "";
+          }
+          if (slackUnits == 'K') {
+            slackValue = ', ' + kelvinToCelsius(slackValue);
+            slackUnits = ' °C'
+          }
+          if (slackUnits == 'm/s') {
+            slackValue = ', ' + msToKnots(slackValue);
+            slackUnits = ' kn'
+          }
+          if (slackUnits == 'rad') {
+            slackValue = ', ' + radToDeg(slackValue);
+            slackUnits = ' deg'
+          }
+          valueUnit = ', ' + slackValue + ' ' + slackUnits;
           slack.send({
             channel: options.slackChannel,
             text: options.slackTitle,
             fields: {
               'Signal K path': u.values[0].path,
               State: u.values[0].value.state,
-              Message: u.values[0].value.message,
+              Message: u.values[0].value.message + slackValue + slackUnits,
               Timestamp: u.values[0].value.timestamp
             }
           })
