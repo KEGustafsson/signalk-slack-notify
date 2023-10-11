@@ -54,41 +54,44 @@ module.exports = function createPlugin(app) {
           let slackValue;
           let slackUnits;
           let slackData;
-          try {
-            slackData = app.getSelfPath(slackPath);
-            slackValue = slackData.value  || null;
-            slackUnits = slackData.meta.units || null
-          } catch (error) {
-            slackValue = "NaN";
-            slackUnits = "";
-          }
-          if (slackUnits == 'K') {
-            slackValue = kelvinToCelsius(slackValue);
-            slackUnits = ' °C'
-          }
-          if (slackUnits == 'm/s') {
-            slackValue = msToKnots(slackValue);
-            slackUnits = ' kn'
-          }
-          if (slackUnits == 'rad') {
-            slackValue = radToDeg(slackValue);
-            slackUnits = ' deg'
-          }
-          slack.send({
-            channel: options.slackChannel,
-            text: options.slackTitle,
-            fields: {
-              'Signal K path': u.values[0].path,
-              State: u.values[0].value.state,
-              Message: u.values[0].value.message,
-              Value: slackValue + slackUnits,
-              Timestamp: u.values[0].value.timestamp
+
+          setTimeout(function () {
+            try {
+              slackData = app.getSelfPath(slackPath);
+              slackValue = slackData.value  || null;
+              slackUnits = slackData.meta.units || null
+            } catch (error) {
+              slackValue = "NaN";
+              slackUnits = "";
             }
-          })
-          setImmediate(() =>
-            app.emit('connectionwrite', { providerId: plugin.id })
-          )
-          app.debug(JSON.stringify(u, null, 2));
+            if (slackUnits == 'K') {
+              slackValue = kelvinToCelsius(slackValue);
+              slackUnits = ' °C'
+            }
+            if (slackUnits == 'm/s') {
+              slackValue = msToKnots(slackValue);
+              slackUnits = ' kn'
+            }
+            if (slackUnits == 'rad') {
+              slackValue = radToDeg(slackValue);
+              slackUnits = ' deg'
+            }
+            slack.send({
+              channel: options.slackChannel,
+              text: options.slackTitle,
+              fields: {
+                'Signal K path': u.values[0].path,
+                State: u.values[0].value.state,
+                Message: u.values[0].value.message,
+                Value: slackValue + slackUnits,
+                Timestamp: u.values[0].value.timestamp
+              }
+            })
+            setImmediate(() =>
+              app.emit('connectionwrite', { providerId: plugin.id })
+            )
+            app.debug(JSON.stringify(u, null, 2));
+          }, 1000);
         })
       }
     )
