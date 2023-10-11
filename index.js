@@ -35,11 +35,11 @@ module.exports = function createPlugin(app) {
       if (metersPerSecond < 0) {
         throw new Error("Speed in meters per second cannot be negative");
       }
-      return metersPerSecond * 1.94384449; // Conversion factor
+      return (metersPerSecond * 1.94384449).toFixed(1); // Conversion factor
     }
 
     function radToDeg(radians) {
-      return (radians * 180) / Math.PI; // Conversion formula
+      return ((radians * 180) / Math.PI).toFixed(1); // Conversion formula
     }
 
     app.subscriptionmanager.subscribe(
