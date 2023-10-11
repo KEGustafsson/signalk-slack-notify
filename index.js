@@ -59,29 +59,29 @@ module.exports = function createPlugin(app) {
             slackValue = slackData.value  || null;
             slackUnits = slackData.meta.units || null
           } catch (error) {
-            slackValue = "";
+            slackValue = "NaN";
             slackUnits = "";
           }
           if (slackUnits == 'K') {
-            slackValue = ', ' + kelvinToCelsius(slackValue);
+            slackValue = kelvinToCelsius(slackValue);
             slackUnits = ' °C'
           }
           if (slackUnits == 'm/s') {
-            slackValue = ', ' + msToKnots(slackValue);
+            slackValue = msToKnots(slackValue);
             slackUnits = ' kn'
           }
           if (slackUnits == 'rad') {
-            slackValue = ', ' + radToDeg(slackValue);
+            slackValue = radToDeg(slackValue);
             slackUnits = ' deg'
           }
-          valueUnit = ', ' + slackValue + ' ' + slackUnits;
           slack.send({
             channel: options.slackChannel,
             text: options.slackTitle,
             fields: {
               'Signal K path': u.values[0].path,
               State: u.values[0].value.state,
-              Message: u.values[0].value.message + slackValue + slackUnits,
+              Message: u.values[0].value.message,
+              Value: slackValue + slackUnits,
               Timestamp: u.values[0].value.timestamp
             }
           })
