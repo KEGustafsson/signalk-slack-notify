@@ -1,4 +1,5 @@
 # signalk-slack-notify
+![Slack Alert](doc/slack_alert.jpg)
 
 ## Create Slack account and private free Workspace
 https://app.slack.com/get-started#/createnew
