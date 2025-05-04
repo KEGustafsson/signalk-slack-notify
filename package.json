@@ -20,7 +20,7 @@
   "license": "ISC",
   "homepage": "https://github.com/KEGustafsson/signalk-slack-notify#readme",
   "dependencies": {
-    "slack-notify": "2.0.6"
+    "slack-notify": "^2.0.7"
   },
   "devDependencies": {
     "eslint": "^8.26.0",
