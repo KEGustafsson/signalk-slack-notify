@@ -6,3 +6,4 @@ jspm_packages
 .git
 .eslintrc.js
 .prettierrc.json
+eslint.config.js

@@ -2,11 +2,12 @@
   "name": "signalk-slack-notify",
   "version": "0.2.0",
   "description": "Send notifications from Signal K to Slack using Webhook API",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "format": "npm run prettier && npm run lint",
     "prettier": "prettier -w index.js",
-    "lint": "eslint -c .eslintrc.js --fix index.js"
+    "lint": "eslint --fix index.js"
   },
   "keywords": [
     "signalk-node-server-plugin",
@@ -23,7 +24,9 @@
     "slack-notify": "^2.0.7"
   },
   "devDependencies": {
+    "@eslint/js": "^9.26.0",
     "eslint": "^9.26.0",
+    "globals": "^15.4.0",
     "prettier": "^3.5.3"
   }
 }

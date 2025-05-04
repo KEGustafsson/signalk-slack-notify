@@ -26,20 +26,20 @@ module.exports = function createPlugin(app) {
 
     function kelvinToCelsius(kelvin) {
       if (kelvin < 0) {
-        throw new Error("Temperature in Kelvin cannot be negative");
+        throw new Error('Temperature in Kelvin cannot be negative')
       }
-      return (kelvin - 273.15).toFixed(1); // Conversion formula
+      return (kelvin - 273.15).toFixed(1) // Conversion formula
     }
 
     function msToKnots(metersPerSecond) {
       if (metersPerSecond < 0) {
-        throw new Error("Speed in meters per second cannot be negative");
+        throw new Error('Speed in meters per second cannot be negative')
       }
-      return (metersPerSecond * 1.94384449).toFixed(1); // Conversion factor
+      return (metersPerSecond * 1.94384449).toFixed(1) // Conversion factor
     }
 
     function radToDeg(radians) {
-      return ((radians * 180) / Math.PI).toFixed(1); // Conversion formula
+      return ((radians * 180) / Math.PI).toFixed(1) // Conversion formula
     }
 
     app.subscriptionmanager.subscribe(
@@ -50,30 +50,31 @@ module.exports = function createPlugin(app) {
       },
       (delta) => {
         delta.updates.forEach((u) => {
-          const slackPath = u.values[0].path.replace(/^notifications\./, '');
-          let slackValue;
-          let slackUnits;
-          let slackData;
+          const slackPath = u.values[0].path.replace(/^notifications\./, '')
+          let slackValue
+          let slackUnits
+          let slackData
 
           setTimeout(function () {
             try {
-              slackData = app.getSelfPath(slackPath);
-              slackValue = slackData.value  || null;
+              slackData = app.getSelfPath(slackPath)
+              slackValue = slackData.value || null
               slackUnits = slackData.meta.units || null
             } catch (error) {
-              slackValue = "NaN";
-              slackUnits = "";
+              slackValue = 'NaN'
+              slackUnits = ''
+              app.debug(error)
             }
             if (slackUnits == 'K') {
-              slackValue = kelvinToCelsius(slackValue);
+              slackValue = kelvinToCelsius(slackValue)
               slackUnits = ' °C'
             }
             if (slackUnits == 'm/s') {
-              slackValue = msToKnots(slackValue);
+              slackValue = msToKnots(slackValue)
               slackUnits = ' kn'
             }
             if (slackUnits == 'rad') {
-              slackValue = radToDeg(slackValue);
+              slackValue = radToDeg(slackValue)
               slackUnits = ' deg'
             }
             slack.send({
@@ -90,8 +91,8 @@ module.exports = function createPlugin(app) {
             setImmediate(() =>
               app.emit('connectionwrite', { providerId: plugin.id })
             )
-            app.debug(JSON.stringify(u, null, 2));
-          }, 1000);
+            app.debug(JSON.stringify(u, null, 2))
+          }, 1000)
         })
       }
     )
