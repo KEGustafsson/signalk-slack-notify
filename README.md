@@ -5,6 +5,7 @@
 https://app.slack.com/get-started#/createnew
 - Make you own Slack workspace
 - Add #alert channel
+- Select alert levels
   
 ## Make a Bot
 https://api.slack.com/apps

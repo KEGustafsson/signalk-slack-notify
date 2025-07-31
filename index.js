@@ -50,6 +50,12 @@ module.exports = function createPlugin(app) {
       },
       (delta) => {
         delta.updates.forEach((u) => {
+          const notificationState = u.values[0].value.state          
+          const selectedLevels = options.alertLevels || []
+          if (selectedLevels.length > 0 && !selectedLevels.includes(notificationState)) {
+            app.debug(`Skipping notification with state: ${notificationState}`)
+            return
+          }
           const slackPath = u.values[0].path.replace(/^notifications\./, '')
           let slackValue
           let slackUnits
@@ -82,7 +88,7 @@ module.exports = function createPlugin(app) {
               text: options.slackTitle,
               fields: {
                 'Signal K path': u.values[0].path,
-                State: u.values[0].value.state,
+                State: notificationState,
                 Message: u.values[0].value.message,
                 Value: slackValue + slackUnits,
                 Timestamp: u.values[0].value.timestamp
@@ -119,6 +125,16 @@ module.exports = function createPlugin(app) {
         type: 'string',
         title: 'Slack channel',
         default: '#alert'
+      },
+      alertLevels: {
+        type: 'array',
+        title: 'Alert levels to send',
+        description: 'Select which alert levels should trigger Slack notifications (leave empty to send all)',
+        items: {
+          type: 'string',
+          enum: ['normal', 'alert', 'warn', 'alarm', 'emergency']
+        },
+        default: ['alert', 'warn', 'alarm', 'emergency']
       }
     }
   }
