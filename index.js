@@ -66,6 +66,7 @@ module.exports = function createPlugin(app) {
               slackData = app.getSelfPath(slackPath)
               slackValue = slackData.value || null
               slackUnits = slackData.meta.units || null
+              //timestamp = slackData.timestamp || new Date().toISOString()
             } catch (error) {
               slackValue = 'NaN'
               slackUnits = ''
@@ -73,15 +74,18 @@ module.exports = function createPlugin(app) {
             }
             if (slackUnits == 'K') {
               slackValue = kelvinToCelsius(slackValue)
-              slackUnits = ' °C'
+              slackUnits = '°C'
+            }
+            if (slackUnits == 'C') {
+              slackUnits = '°C'
             }
             if (slackUnits == 'm/s') {
               slackValue = msToKnots(slackValue)
-              slackUnits = ' kn'
+              slackUnits = 'kn'
             }
             if (slackUnits == 'rad') {
               slackValue = radToDeg(slackValue)
-              slackUnits = ' deg'
+              slackUnits = 'deg'
             }
             slack.send({
               channel: options.slackChannel,
@@ -90,8 +94,8 @@ module.exports = function createPlugin(app) {
                 'Signal K path': u.values[0].path,
                 State: notificationState,
                 Message: u.values[0].value.message,
-                Value: slackValue + slackUnits,
-                Timestamp: u.values[0].value.timestamp
+                Value: slackValue + " " + slackUnits,
+                Timestamp: u.timestamp
               }
             })
             setImmediate(() =>
