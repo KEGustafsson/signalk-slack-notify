@@ -1,12 +1,25 @@
 {
   "name": "signalk-slack-notify",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "Send notifications from Signal K to Slack using Webhook API",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "doc/slack_alert.jpg"
+  ],
   "scripts": {
-    "format": "npm run prettier && npm run lint",
-    "prettier": "prettier -w index.js",
-    "lint": "eslint --fix index.js"
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "clean:test": "node -e \"require('node:fs').rmSync('.test-dist', { recursive: true, force: true })\"",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run clean:test && tsc -p tsconfig.test.json && node --test --test-isolation=none --test-concurrency=1 .test-dist/test/**/*.test.js && npm run clean:test",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "audit": "npm audit --audit-level=high",
+    "verify": "npm run format && npm run lint && npm run typecheck && npm test && npm run build && npm run audit && npm pack --dry-run"
   },
   "keywords": [
     "signalk-node-server-plugin",
@@ -24,8 +37,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@types/node": "^25.5.2",
     "eslint": "^9.26.0",
     "globals": "^15.4.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0"
   }
 }
