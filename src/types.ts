@@ -163,4 +163,9 @@ export interface SignalKPlugin {
   start(options: PluginOptions): void
   stop(): void
   schema: PluginSchema
+  uiSchema?: {
+    alertLevels: {
+      'ui:widget': 'checkboxes'
+    }
+  }
 }

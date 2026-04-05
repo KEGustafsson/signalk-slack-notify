@@ -195,6 +195,12 @@ test('plugin sends Slack messages for selected alert levels', async () => {
       }
     ]
   })
+  assert.equal(plugin.schema.properties.alertLevels.uniqueItems, true)
+  assert.deepEqual(plugin.uiSchema, {
+    alertLevels: {
+      'ui:widget': 'checkboxes'
+    }
+  })
 
   deliver(
     createDelta('notifications.navigation.anchor', 'alert', 'Anchor drag alarm')

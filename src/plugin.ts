@@ -53,6 +53,7 @@ const pluginSchema = {
       title: 'Alert levels to send',
       description:
         'Select which alert levels should trigger Slack notifications (leave empty to send all)',
+      uniqueItems: true,
       items: {
         type: 'string',
         enum: ALERT_LEVELS
@@ -61,6 +62,12 @@ const pluginSchema = {
     }
   }
 } as const satisfies PluginSchema
+
+const pluginUiSchema = {
+  alertLevels: {
+    'ui:widget': 'checkboxes'
+  }
+} as const
 
 const defaultDependencies: PluginDependencies = {
   createSlackNotifier: (webhookUrl) => SlackNotifyFactory(webhookUrl),
@@ -235,6 +242,7 @@ export function createPlugin(
     description: PLUGIN_DESCRIPTION,
     start,
     stop,
-    schema: pluginSchema
+    schema: pluginSchema,
+    uiSchema: pluginUiSchema
   }
 }
