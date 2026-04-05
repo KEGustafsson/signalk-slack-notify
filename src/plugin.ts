@@ -50,10 +50,9 @@ const pluginSchema = {
     },
     alertLevels: {
       type: 'array',
-      title: 'Slack notification levels',
+      title: 'Alert levels to send',
       description:
-        'Choose which notification states are forwarded to Slack. Leave this empty to forward every state.',
-      uniqueItems: true,
+        'Select which alert levels should trigger Slack notifications (leave empty to send all)',
       items: {
         type: 'string',
         enum: ALERT_LEVELS
