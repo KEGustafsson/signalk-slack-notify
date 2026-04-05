@@ -95,6 +95,16 @@ function isSelectedLevel(
   return selectedLevels.some((level) => level === notificationState)
 }
 
+function resolveReportedLevels(
+  selectedLevels: readonly AlertLevel[]
+): readonly AlertLevel[] {
+  return selectedLevels.length > 0 ? selectedLevels : ALERT_LEVELS
+}
+
+function formatAlertLevels(levels: readonly AlertLevel[]): string {
+  return levels.length > 0 ? levels.join(', ') : 'none'
+}
+
 function normalizeOptions(options: PluginOptions): NormalizedPluginOptions {
   return {
     ...options,
@@ -164,14 +174,17 @@ export function createPlugin(
       measurement = fallbackMeasurement(rawValue, rawUnits)
     }
 
+    const slackMessage = buildSlackMessage(
+      options,
+      DEFAULT_SLACK_TITLE,
+      notification,
+      measurement
+    )
+
     try {
-      await slack.send(
-        buildSlackMessage(
-          options,
-          DEFAULT_SLACK_TITLE,
-          notification,
-          measurement
-        )
+      await slack.send(slackMessage)
+      app.debug(
+        `Reported to Slack for "${notification.notificationPath}": ${JSON.stringify(slackMessage)}`
       )
 
       dependencies.emitAsync(() => {
@@ -196,8 +209,15 @@ export function createPlugin(
     const normalizedOptions = normalizeOptions(options)
     const slack = dependencies.createSlackNotifier(normalizedOptions.webhook)
     const selectedLevels = normalizedOptions.alertLevels ?? []
+    const reportedLevels = resolveReportedLevels(selectedLevels)
+    const skippedLevels = ALERT_LEVELS.filter(
+      (level) => !reportedLevels.includes(level)
+    )
 
     app.debug(`${PLUGIN_NAME} started`)
+    app.debug(
+      `Alert level filter. Reported to Slack: ${formatAlertLevels(reportedLevels)}. Skipped: ${formatAlertLevels(skippedLevels)}.`
+    )
     setStatus?.('Running')
 
     app.subscriptionmanager.subscribe(
@@ -221,7 +241,6 @@ export function createPlugin(
             selectedLevels.length > 0 &&
             !isSelectedLevel(selectedLevels, notification.state)
           ) {
-            app.debug(`Skipping notification with state: ${notification.state}`)
             continue
           }
 

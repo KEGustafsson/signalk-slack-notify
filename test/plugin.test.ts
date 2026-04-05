@@ -174,14 +174,15 @@ function createAppHarness(
 
 test('plugin sends Slack messages for selected alert levels', async () => {
   const { notifier, sentMessages } = createNotifier()
-  const { app, deliver, emittedEvents, subscription } = createAppHarness({
-    'navigation.anchor': {
-      value: 273.15,
-      meta: {
-        units: 'K'
+  const { app, deliver, debugLogs, emittedEvents, subscription } =
+    createAppHarness({
+      'navigation.anchor': {
+        value: 273.15,
+        meta: {
+          units: 'K'
+        }
       }
-    }
-  })
+    })
 
   const plugin = createPlugin(app, createDependencies(notifier))
   plugin.start(TEST_OPTIONS)
@@ -226,6 +227,23 @@ test('plugin sends Slack messages for selected alert levels', async () => {
       payload: { providerId: 'signalk-slack-notify' }
     }
   ])
+  assert.ok(
+    debugLogs.some((message) =>
+      message.includes(
+        'Alert level filter. Reported to Slack: alert, warn, alarm, emergency. Skipped: normal.'
+      )
+    )
+  )
+  assert.ok(
+    debugLogs.some(
+      (message) =>
+        message.includes(
+          'Reported to Slack for "notifications.navigation.anchor":'
+        ) &&
+        message.includes('"Message":"Anchor drag alarm"') &&
+        message.includes('"State":"alert"')
+    )
+  )
 })
 
 test('plugin skips non-selected alert levels', async () => {
@@ -254,8 +272,16 @@ test('plugin skips non-selected alert levels', async () => {
   assert.equal(sentMessages.length, 0)
   assert.ok(
     debugLogs.some((message) =>
-      message.includes('Skipping notification with state: alert')
+      message.includes(
+        'Alert level filter. Reported to Slack: alarm. Skipped: normal, alert, warn, emergency.'
+      )
     )
+  )
+  assert.equal(
+    debugLogs.some((message) =>
+      message.includes('Skipping notification with state: alert')
+    ),
+    false
   )
 })
 
