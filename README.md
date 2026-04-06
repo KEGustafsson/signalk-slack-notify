@@ -43,6 +43,14 @@ https://api.slack.com/apps
 - Add Slack channel, default #alert
 - Select alert levels to send
 
+## Behaviour
+
+### State change deduplication
+
+Slack notifications are only sent when a notification's state actually changes. If Signal K repeatedly delivers the same state for a path (e.g. `alarm → alarm → alarm`), only the first occurrence triggers a Slack message. A new message is sent as soon as the state transitions to a different value (e.g. `alarm → warn` or `alarm → normal`).
+
+State history is reset when the plugin stops or restarts, so the first notification after a restart always fires.
+
 ## Development
 
 - `npm install`

@@ -131,6 +131,7 @@ export function createPlugin(
   const pendingTimers = new Set<ReturnType<typeof setTimeout>>()
   let isStopped = true
   const setStatus = app.setPluginStatus ?? app.setProviderStatus
+  const lastKnownStates = new Map<string, string>()
 
   function clearPendingTimers(): void {
     for (const timer of pendingTimers) {
@@ -149,6 +150,7 @@ export function createPlugin(
     }
 
     unsubscribes = []
+    lastKnownStates.clear()
   }
 
   async function sendNotification(
@@ -243,6 +245,18 @@ export function createPlugin(
           ) {
             continue
           }
+
+          const previousState = lastKnownStates.get(
+            notification.notificationPath
+          )
+          if (previousState === notification.state) {
+            app.debug(
+              `Skipping duplicate state "${notification.state}" for "${notification.notificationPath}"`
+            )
+            continue
+          }
+
+          lastKnownStates.set(notification.notificationPath, notification.state)
 
           const timer = dependencies.schedule(() => {
             pendingTimers.delete(timer)

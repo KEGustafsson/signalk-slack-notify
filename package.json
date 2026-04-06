@@ -1,6 +1,6 @@
 {
   "name": "signalk-slack-notify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Send notifications from Signal K to Slack using Webhook API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

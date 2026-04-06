@@ -373,6 +373,146 @@ test('plugin catches and logs Slack send failures', async () => {
   )
 })
 
+test('plugin skips duplicate state for same notification path', async () => {
+  const { notifier, sentMessages } = createNotifier()
+  const { app, deliver } = createAppHarness({
+    'navigation.anchor': { value: 0, meta: { units: 'C' } }
+  })
+  const plugin = createPlugin(app, createDependencies(notifier))
+
+  plugin.start(TEST_OPTIONS)
+
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+
+  await waitForAsyncWork()
+
+  assert.equal(sentMessages.length, 1)
+  assert.equal(sentMessages[0]?.fields.State, 'alarm')
+})
+
+test('plugin sends on state change after duplicate', async () => {
+  const { notifier, sentMessages } = createNotifier()
+  const { app, deliver } = createAppHarness({
+    'navigation.anchor': { value: 0, meta: { units: 'C' } }
+  })
+  const plugin = createPlugin(app, createDependencies(notifier))
+
+  plugin.start(TEST_OPTIONS)
+
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Still alarm')
+  )
+  deliver(createDelta('notifications.navigation.anchor', 'warn', 'Downgraded'))
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Back to alarm')
+  )
+
+  await waitForAsyncWork()
+
+  assert.equal(sentMessages.length, 3)
+  assert.equal(sentMessages[0]?.fields.State, 'alarm')
+  assert.equal(sentMessages[1]?.fields.State, 'warn')
+  assert.equal(sentMessages[2]?.fields.State, 'alarm')
+})
+
+test('plugin tracks state independently per notification path', async () => {
+  const { notifier, sentMessages } = createNotifier()
+  const { app, deliver } = createAppHarness({
+    'navigation.anchor': { value: 0, meta: { units: 'C' } },
+    'navigation.depth': { value: 5, meta: { units: 'm' } }
+  })
+  const plugin = createPlugin(app, createDependencies(notifier))
+
+  plugin.start(TEST_OPTIONS)
+
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Still alarm')
+  )
+  deliver(
+    createDelta('notifications.navigation.depth', 'alarm', 'Shallow water')
+  )
+  deliver(
+    createDelta('notifications.navigation.depth', 'alarm', 'Still shallow')
+  )
+
+  await waitForAsyncWork()
+
+  assert.equal(sentMessages.length, 2)
+  assert.equal(
+    sentMessages[0]?.fields['Signal K path'],
+    'notifications.navigation.anchor'
+  )
+  assert.equal(
+    sentMessages[1]?.fields['Signal K path'],
+    'notifications.navigation.depth'
+  )
+})
+
+test('plugin logs debug message when skipping duplicate state', async () => {
+  const { notifier } = createNotifier()
+  const { app, deliver, debugLogs } = createAppHarness({
+    'navigation.anchor': { value: 0, meta: { units: 'C' } }
+  })
+  const plugin = createPlugin(app, createDependencies(notifier))
+
+  plugin.start(TEST_OPTIONS)
+
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+
+  await waitForAsyncWork()
+
+  assert.ok(
+    debugLogs.some(
+      (message) =>
+        message.includes('Skipping duplicate state "alarm"') &&
+        message.includes('notifications.navigation.anchor')
+    )
+  )
+})
+
+test('plugin resets state tracking on restart', async () => {
+  const { notifier, sentMessages } = createNotifier()
+  const { app, deliver } = createAppHarness({
+    'navigation.anchor': { value: 0, meta: { units: 'C' } }
+  })
+  const plugin = createPlugin(app, createDependencies(notifier))
+
+  plugin.start(TEST_OPTIONS)
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  await waitForAsyncWork()
+
+  plugin.stop()
+  plugin.start(TEST_OPTIONS)
+
+  deliver(
+    createDelta('notifications.navigation.anchor', 'alarm', 'Anchor drag')
+  )
+  await waitForAsyncWork()
+
+  assert.equal(sentMessages.length, 2)
+})
+
 test('plugin stop clears pending timers and unsubscribes', async () => {
   const { notifier, sentMessages } = createNotifier()
   const harness = createAppHarness({
